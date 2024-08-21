@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/swipeRefreshLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 사용자가 선택하거나 촬영한 이미지가 표시될 ImageView (크기 조정) -->
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="Selected image will be displayed here"
+            android:background="#EEEEEE"/>
+
+        <!-- 이미지 선택 버튼 -->
+        <Button
+            android:id="@+id/buttonSelect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="사진 선택"
+            android:layout_marginTop="16dp"/>
+
+        <!-- 전송 버튼 -->
+        <Button
+            android:id="@+id/buttonSend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="번호판 인식"
+            android:layout_marginTop="16dp"/>
+
+        <!-- 프로그래스바 -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+
+        <!-- 가로로 정렬된 서버 응답 결과를 표시할 ImageView 두 개 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <ImageView
+                android:id="@+id/resultImageView1"
+                android:layout_width="0dp"
+                android:layout_height="150dp"
+                android:layout_weight="1"
+                android:scaleType="fitCenter"
+                android:background="#EEEEEE"
+                android:visibility="gone"/>
+
+            <ImageView
+                android:id="@+id/resultImageView2"
+                android:layout_width="0dp"
+                android:layout_height="150dp"
+                android:layout_weight="1"
+                android:scaleType="fitCenter"
+                android:background="#EEEEEE"
+                android:visibility="gone"/>
+        </LinearLayout>
+
+        <!-- 서버 응답 텍스트를 표시할 TextView -->
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:text=""
+            android:gravity="center"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="16dp"/>
+    </LinearLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

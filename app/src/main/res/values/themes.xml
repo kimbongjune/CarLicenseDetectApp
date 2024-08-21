@@ -1,0 +1,13 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.CarLicense" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- 나머지 UI 요소의 색상 -->
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryVariant">@color/primaryColor</item>
+        <item name="colorOnPrimary">@android:color/white</item> <!-- 기본적으로 흰색 텍스트 -->
+
+        <!-- 상태바와 내비게이션 바 색상 -->
+        <item name="android:statusBarColor" tools:targetApi="l">@color/black</item>
+        <item name="android:navigationBarColor">@color/black</item>
+    </style>
+</resources>
