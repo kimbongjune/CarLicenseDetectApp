@@ -8,6 +8,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
@@ -16,6 +18,8 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -46,6 +50,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var textView: TextView
     private var currentCall: Call<ApiResponse>? = null
+    private var doubleBackToExitPressedOnce = false
 
     private val REQUEST_GALLERY = 2
     private val REQUEST_PERMISSION_CODE = 100
@@ -68,7 +73,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         buttonSelect.setOnClickListener {
-            selectImage()
+            if(!checkPermissions()){
+                requestPermissions()
+            }else{
+                selectImage()
+            }
         }
 
         buttonSend.setOnClickListener {
@@ -81,13 +90,30 @@ class MainActivity : AppCompatActivity() {
             // 새로고침 동작 처리
             refreshScreen()
         }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (doubleBackToExitPressedOnce) {
+                    finish()
+                } else {
+                    doubleBackToExitPressedOnce = true
+                    Toast.makeText(this@MainActivity, "한 번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show()
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        doubleBackToExitPressedOnce = false
+                    }, 2000)
+                }
+            }
+        })
     }
 
     private fun refreshScreen() {
         // 기존 데이터 초기화
         imageView.setImageResource(0) // 선택된 이미지를 초기화
         resultImageView1.setImageResource(0) // 서버 응답 이미지1 초기화
+        resultImageView1.visibility = View.GONE
         resultImageView2.setImageResource(0) // 서버 응답 이미지2 초기화
+        resultImageView2.visibility = View.GONE
         textView.text = "" // 텍스트 초기화
         currentCall?.cancel()
 
@@ -255,21 +281,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkPermissions(): Boolean {
         val cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-        val readStoragePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-        val writeStoragePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
-        return cameraPermission == PackageManager.PERMISSION_GRANTED &&
-                readStoragePermission == PackageManager.PERMISSION_GRANTED &&
-                writeStoragePermission == PackageManager.PERMISSION_GRANTED
+        return cameraPermission == PackageManager.PERMISSION_GRANTED
     }
 
     private fun requestPermissions() {
         ActivityCompat.requestPermissions(
             this,
             arrayOf(
-                Manifest.permission.CAMERA,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                Manifest.permission.CAMERA
             ),
             REQUEST_PERMISSION_CODE
         )
@@ -282,10 +302,25 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_PERMISSION_CODE) {
+            val deniedPermissions = permissions.filterIndexed { index, _ ->
+                grantResults[index] != PackageManager.PERMISSION_GRANTED
+            }
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 // 모든 권한이 허용되었습니다.
             } else {
-                // 일부 권한이 거부되었습니다.
+                Log.d("DeniedPermissions", "거부된 권한: ${deniedPermissions.joinToString()}")
+
+                AlertDialog.Builder(this)
+                    .setTitle("권한 설정 필요")
+                    .setMessage("이 앱을 사용하려면 필수 권한이 필요합니다. 권한을 설정하려면 설정 화면으로 이동하세요.")
+                    .setPositiveButton("설정으로 이동") { _, _ ->
+                        val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", packageName, null)
+                        }
+                        startActivity(intent)
+                    }
+                    .setNegativeButton("취소", null)
+                    .show()
             }
         }
     }
